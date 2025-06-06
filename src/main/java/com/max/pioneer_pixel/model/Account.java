@@ -2,11 +2,13 @@ package com.max.pioneer_pixel.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
 @Entity
 @Data
+@NoArgsConstructor
 public class Account {
 
     @Id

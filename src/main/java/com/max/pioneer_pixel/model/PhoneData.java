@@ -11,6 +11,7 @@ public class PhoneData {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @SuppressWarnings("JpaDataSourceORMInspection")
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
