@@ -4,13 +4,12 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
 @Data
 @NoArgsConstructor
-@Table(name = "\"user\"") // если у тебя таблица называется user — лучше экранировать
+@Table(name = "\"user\"") // если таблица называется user, нужно экранировать
 public class User {
 
     @Id
@@ -27,4 +26,12 @@ public class User {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
     private Account account;
+
+    // Метод для вычисления возраста пользователя
+    public int getAge() {
+        if (dateOfBirth == null) {
+            return 0; // можно изменить логику, если надо
+        }
+        return java.time.Period.between(dateOfBirth, LocalDate.now()).getYears();
+    }
 }

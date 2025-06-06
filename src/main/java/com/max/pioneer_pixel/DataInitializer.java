@@ -19,7 +19,6 @@ public class DataInitializer {
     @PostConstruct
     public void init() {
         List<User> users = dataGeneratorService.generateUsers(10);
-        users.forEach(u -> System.out.println("Generated user: " + u.getFullName() + ", age: " + u.getAge()));
-        // Здесь можно сохранить пользователей в БД через UserRepository, если нужно
+        users.forEach(u -> System.out.println("Generated user: " + u.getName() + ", age: " + u.getAge()));
     }
 }

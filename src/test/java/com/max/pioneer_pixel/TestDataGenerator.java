@@ -13,7 +13,7 @@ public class TestDataGenerator {
         List<User> users = generator.generateUsers(5);
 
         for (User user : users) {
-            System.out.println("User fullName: " + user.getFullName());
+            System.out.println("User fullName: " + user.getName());
             System.out.println("Date of birth: " + user.getDateOfBirth());
             System.out.println("Age: " + user.getAge());
             System.out.println("Password: " + user.getPassword());
