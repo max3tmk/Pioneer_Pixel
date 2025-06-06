@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS user_entity CASCADE;
+DROP TABLE IF EXISTS account_entity CASCADE;

@@ -4,7 +4,14 @@ spring:
     username: pioneer_user
     password: pioneer_pass
     driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
