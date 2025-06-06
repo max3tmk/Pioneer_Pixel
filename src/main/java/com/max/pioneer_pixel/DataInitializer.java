@@ -1,18 +1,24 @@
 package com.max.pioneer_pixel;
 
+import com.max.pioneer_pixel.model.User;
 import com.max.pioneer_pixel.service.DataGeneratorService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.boot.CommandLineRunner;
+import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
-@RequiredArgsConstructor
-public class DataInitializer implements CommandLineRunner {
+public class DataInitializer {
 
     private final DataGeneratorService dataGeneratorService;
 
-    @Override
-    public void run(String... args) {
-        dataGeneratorService.generateTestData(20); // Генерация 20 пользователей
+    public DataInitializer(DataGeneratorService dataGeneratorService) {
+        this.dataGeneratorService = dataGeneratorService;
+    }
+
+    @PostConstruct
+    public void init() {
+        List<User> users = dataGeneratorService.generateUsers(10);
+        users.forEach(u -> System.out.println("Generated user: " + u.getName() + ", age: " + u.getAge()));
     }
 }

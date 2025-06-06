@@ -1,54 +1,46 @@
 package com.max.pioneer_pixel.service;
 
 import com.github.javafaker.Faker;
-import com.max.pioneer_pixel.model.*;
-import com.max.pioneer_pixel.dao.*;
-import lombok.RequiredArgsConstructor;
+import com.max.pioneer_pixel.model.User;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.time.ZoneId;
-import java.util.Locale;
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 @Service
-@RequiredArgsConstructor
 public class DataGeneratorService {
 
-    private final UserRepository userRepository;
-    private final AccountRepository accountRepository;
-    private final EmailDataRepository emailDataRepository;
-    private final PhoneDataRepository phoneDataRepository;
-
-    private final Faker faker = new Faker(new Locale("ru"));
+    private final Faker faker = new Faker();
     private final Random random = new Random();
 
-    public void generateTestData(int count) {
+    public List<User> generateUsers(int count) {
+        List<User> users = new ArrayList<>();
+
         for (int i = 0; i < count; i++) {
             User user = new User();
+
+            // Генерируем имя
             user.setName(faker.name().fullName());
-            user.setDateOfBirth(faker.date().birthday().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+
+            // Генерируем дату рождения (от 18 до 70 лет)
+            int age = 18 + random.nextInt(53);
+            LocalDate dob = LocalDate.now().minusYears(age).minusDays(random.nextInt(365));
+            user.setDateOfBirth(dob);
+
+            // Устанавливаем пароль (просто рандомный текст с длиной >= 8)
             user.setPassword(faker.internet().password(8, 16));
-            user = userRepository.save(user);
 
-            Account account = new Account();
-            account.setUser(user);
-            account.setBalance(BigDecimal.valueOf(random.nextDouble() * 100_000).setScale(2, BigDecimal.ROUND_HALF_UP));
-            accountRepository.save(account);
-
-            EmailData emailData = new EmailData();
-            emailData.setUser(user);
-            emailData.setEmail(faker.internet().emailAddress());
-            emailDataRepository.save(emailData);
-
-            PhoneData phoneData = new PhoneData();
-            phoneData.setUser(user);
-            phoneData.setPhone(generatePhoneNumber());
-            phoneDataRepository.save(phoneData);
+            users.add(user);
         }
+
+        return users;
     }
 
-    private String generatePhoneNumber() {
-        return "79" + (100000000 + random.nextInt(900000000));
+    // Можно добавить метод для вычисления возраста, если нужно:
+    public int calculateAge(LocalDate dob) {
+        return Period.between(dob, LocalDate.now()).getYears();
     }
 }
