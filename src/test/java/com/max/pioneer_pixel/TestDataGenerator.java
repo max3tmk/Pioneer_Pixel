@@ -1,7 +1,7 @@
 package com.max.pioneer_pixel;
 
 import com.max.pioneer_pixel.model.User;
-import com.max.pioneer_pixel.util.UserDataGenerator;
+import com.max.pioneer_pixel.UserDataGenerator;
 
 import java.util.List;
 
