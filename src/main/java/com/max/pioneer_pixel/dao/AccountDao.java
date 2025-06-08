@@ -2,5 +2,8 @@ package com.max.pioneer_pixel.dao;
 
 import com.max.pioneer_pixel.model.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface AccountRepository extends JpaRepository<Account, Long> {}
+@Repository
+public interface AccountDao extends JpaRepository<Account, Long> {
+}

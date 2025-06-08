@@ -1,21 +1,23 @@
 package com.max.pioneer_pixel.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 @Entity
-@Data
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class PhoneData {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @SuppressWarnings("JpaDataSourceORMInspection")
-    @ManyToOne
+    private String phoneNumber;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
-    @Column(unique = true, length = 13)
-    private String phone;
 }

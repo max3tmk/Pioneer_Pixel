@@ -1,19 +1,17 @@
-version: '3.8'
+version: '3.9'
 
 services:
   postgres:
     image: postgres:15
     container_name: pioneer_pixel_postgres
-    restart: always
     environment:
+      POSTGRES_DB: pioneer_pixel_db
       POSTGRES_USER: pioneer_user
       POSTGRES_PASSWORD: pioneer_pass
-      POSTGRES_DB: pioneer_pixel_db
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
-      # Убираем монтирование init.sql, т.к. схема создаётся Flyway в приложении
+      - pioneer_pixel_pgdata:/var/lib/postgresql/data
 
 volumes:
-  pgdata:
+  pioneer_pixel_pgdata:

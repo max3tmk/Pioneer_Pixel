@@ -1,23 +1,26 @@
 package com.max.pioneer_pixel;
 
 import com.max.pioneer_pixel.model.User;
-import com.max.pioneer_pixel.service.DataGeneratorService;
+import com.max.pioneer_pixel.util.UserDataGenerator;
 
 import java.util.List;
 
 public class TestDataGenerator {
 
-    public static void main(String[] args) {
-        DataGeneratorService generator = new DataGeneratorService();
+    private final UserDataGenerator generator = new UserDataGenerator();
 
+    public void runTest() {
         List<User> users = generator.generateUsers(5);
-
         for (User user : users) {
-            System.out.println("User fullName: " + user.getName());
-            System.out.println("Date of birth: " + user.getDateOfBirth());
-            System.out.println("Age: " + user.getAge());
-            System.out.println("Password: " + user.getPassword());
-            System.out.println("------------");
+            System.out.println("User name: " + user.getName());
+            System.out.println("User email: " + user.getEmail());
+            System.out.println("User dateOfBirth: " + user.getDateOfBirth());
+            System.out.println("User password: " + user.getPassword());
+            System.out.println("-----");
         }
+    }
+
+    public static void main(String[] args) {
+        new TestDataGenerator().runTest();
     }
 }
