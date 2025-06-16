@@ -1,19 +1,16 @@
 package com.max.pioneer_pixel.service;
 
-import com.max.pioneer_pixel.dto.UserRequestDto;
-import com.max.pioneer_pixel.dto.UserResponseDto;
+import com.max.pioneer_pixel.model.User;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface UserService {
-    UserResponseDto createUser(UserRequestDto dto);
+    List<User> getAllUsers();
 
-    List<UserResponseDto> getAllUsers();
+    Optional<User> findById(Long id);
 
-    Optional<UserResponseDto> getUserById(Long id);
+    Optional<User> findByEmail(String email);
 
-    Optional<UserResponseDto> updateUser(Long id, UserRequestDto dto);
-
-    boolean deleteUser(Long id);
+    Optional<User> findByPhone(String phone);
 }
