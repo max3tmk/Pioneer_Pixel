@@ -22,14 +22,15 @@ public class EmailDataServiceImpl implements EmailDataService {
     @Override
     @Transactional
     public EmailData addEmailData(Long userId, String email) {
-        Optional<User> userOpt = userDao.findById(userId);
-        if (userOpt.isEmpty()) {
-            throw new IllegalArgumentException("User not found");
+        Optional<User> optionalUser = userDao.findById(userId);
+        if (optionalUser.isEmpty()) {
+            throw new IllegalArgumentException("User with id " + userId + " not found");
         }
-        User user = userOpt.get();
+
+        User user = optionalUser.get();
 
         EmailData emailData = new EmailData();
-        emailData.setUser(user);
+        emailData.setUser(user); // устанавливаем объект User
         emailData.setEmail(email);
 
         return emailDataDao.save(emailData);

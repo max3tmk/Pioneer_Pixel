@@ -1,4 +1,12 @@
 spring:
+  main:
+    allow-bean-definition-overriding: true
+
+  task:
+    scheduling:
+      pool:
+        size: 5
+
   datasource:
     url: jdbc:postgresql://localhost:5432/pioneer_pixel_db
     username: pioneer_user

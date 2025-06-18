@@ -1,16 +1,19 @@
 package com.max.pioneer_pixel.service;
 
-import com.max.pioneer_pixel.model.Account;
+import com.max.pioneer_pixel.model.User;
 
 import java.math.BigDecimal;
 
 public interface AccountService {
 
-    Account createAccountForUser(Long userId, BigDecimal initialBalance);
+    void createInitialAccount(User user, BigDecimal initialBalance);
+    void updateBalance(Long userId, java.math.BigDecimal newBalance);
 
-    Account getAccountByUserId(Long userId);
+    void transfer(Long fromUserId, Long toUserId, java.math.BigDecimal amount);
 
-    void updateBalance(Long userId, BigDecimal newBalance);
-
-    boolean transfer(Long fromUserId, Long toUserId, BigDecimal amount);
+    /**
+     * Увеличивает баланс каждого аккаунта на 10% раз в 30 секунд,
+     * при этом баланс не должен превышать 207% от начального депозита.
+     */
+    void increaseBalanceWithCap();
 }

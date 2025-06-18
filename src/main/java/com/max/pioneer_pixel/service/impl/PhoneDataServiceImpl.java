@@ -21,16 +21,15 @@ public class PhoneDataServiceImpl implements PhoneDataService {
 
     @Override
     @Transactional
-    public PhoneData addPhoneData(Long userId, String phoneNumber) {
-        Optional<User> userOpt = userDao.findById(userId);
-        if (userOpt.isEmpty()) {
-            throw new IllegalArgumentException("User not found");
+    public PhoneData addPhoneData(Long userId, String phone) {
+        Optional<User> optionalUser = userDao.findById(userId);
+        if (optionalUser.isEmpty()) {
+            throw new IllegalArgumentException("User with id " + userId + " not found");
         }
-        User user = userOpt.get();
 
         PhoneData phoneData = new PhoneData();
-        phoneData.setUser(user);
-        phoneData.setPhone(phoneNumber);
+        phoneData.setPhone(phone);
+        phoneData.setUser(optionalUser.get());
 
         return phoneDataDao.save(phoneData);
     }

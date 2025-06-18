@@ -1,9 +1,11 @@
 package com.max.pioneer_pixel.controller;
 
-import com.max.pioneer_pixel.service.AuthService;
-import lombok.Data;
+import com.max.pioneer_pixel.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -11,31 +13,25 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthService authService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtil;
 
-    @PostMapping("/login/email")
-    public ResponseEntity<String> loginByEmail(@RequestBody LoginRequest request) {
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestParam String email,
+                                   @RequestParam String password) {
         try {
-            String token = authService.loginByEmail(request.getLogin(), request.getPassword());
-            return ResponseEntity.ok(token);
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(email, password)
+            );
+
+            String token = jwtUtil.generateToken(email);
+
+            return ResponseEntity.ok(new AuthResponse(token));
+
+        } catch (AuthenticationException e) {
+            return ResponseEntity.status(401).body("Invalid credentials");
         }
     }
 
-    @PostMapping("/login/phone")
-    public ResponseEntity<String> loginByPhone(@RequestBody LoginRequest request) {
-        try {
-            String token = authService.loginByPhone(request.getLogin(), request.getPassword());
-            return ResponseEntity.ok(token);
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
-        }
-    }
-
-    @Data
-    static class LoginRequest {
-        private String login; // email или phone
-        private String password;
-    }
+    private record AuthResponse(String token) {}
 }

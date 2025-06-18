@@ -25,7 +25,7 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalArgumentException("Invalid email or password");
         }
 
-        return jwtUtil.generateToken(user.getId());
+        return jwtUtil.generateToken(user.getId().toString());
     }
 
     @Override
@@ -37,6 +37,6 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalArgumentException("Invalid phone or password");
         }
 
-        return jwtUtil.generateToken(user.getId());
+        return jwtUtil.generateToken(user.getId().toString());
     }
 }

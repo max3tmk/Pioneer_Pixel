@@ -1,40 +1,32 @@
 package com.max.pioneer_pixel.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.validation.constraints.Size;
+import lombok.*;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Entity
-@Table(name = "\"user\"")
+@Table(name = "\"user\"") // Экранирование имени таблицы двойными кавычками
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(length = 500)
     private String name;
 
-    private String password;
-
-    @Column(unique = true)
-    private String email;
-
-    @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PhoneData> phoneDataList;
+    @Column(length = 500)
+    @Size(min = 8, message = "Password must be at least 8 characters long")
+    private String password;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<EmailData> emailDataList;
-
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private Account account;
+    // Здесь можно добавить связи к email и phone, если нужно
 }
