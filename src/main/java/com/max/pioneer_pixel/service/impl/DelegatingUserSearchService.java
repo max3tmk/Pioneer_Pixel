@@ -26,7 +26,7 @@ public class DelegatingUserSearchService implements UserSearchService {
     public Page<User> searchUsers(String name, String email, String phone, LocalDate dateOfBirth, Pageable pageable) {
         String type = searchProperties.getType();
         if ("elastic".equalsIgnoreCase(type)) {
-            return elasticService.searchUsersViaElastic(name, email, phone, dateOfBirth, pageable);
+            return elasticService.searchUsers(name, email, phone, dateOfBirth, pageable);
         } else {
             return jpaService.searchUsers(name, email, phone, dateOfBirth, pageable);
         }

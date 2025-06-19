@@ -1,5 +1,6 @@
 package com.max.pioneer_pixel.controller;
 
+import com.max.pioneer_pixel.api.LoginRequestApi;
 import com.max.pioneer_pixel.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -10,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 
 @RestController
@@ -22,23 +24,23 @@ public class AuthController {
     private final JwtUtil jwtUtil;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestParam String email,
-                                   @RequestParam String password) {
+    public ResponseEntity<?> login(@RequestBody @Valid LoginRequestApi loginRequest) {
         LocalDateTime now = LocalDateTime.now();
-        log.info("[{}] Operation: login | Params: email={}", now, email);
+        String login = loginRequest.getLogin();
+        log.info("[{}] Operation: login | Params: login={}", now, login);
 
         try {
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(email, password)
+                    new UsernamePasswordAuthenticationToken(login, loginRequest.getPassword())
             );
 
-            String token = jwtUtil.generateToken(email);
+            String token = jwtUtil.generateToken(login);
 
-            log.info("[{}] Result: login successful | email={}", now, email);
+            log.info("[{}] Result: login successful | login={}", now, login);
             return ResponseEntity.ok(new AuthResponse(token));
 
         } catch (AuthenticationException e) {
-            log.warn("[{}] Error: invalid credentials for email={}", now, email);
+            log.warn("[{}] Error: invalid credentials for login={}", now, login);
             return ResponseEntity.status(401).body("Invalid credentials");
         }
     }

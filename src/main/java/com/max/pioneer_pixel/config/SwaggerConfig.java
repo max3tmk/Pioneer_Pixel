@@ -14,6 +14,6 @@ public class SwaggerConfig {
                 .info(new Info()
                         .title("Pioneer Pixel API")
                         .version("1.0")
-                        .description("Документация REST API для тестового задания"));
+                        .description("REST API documentation"));
     }
 }

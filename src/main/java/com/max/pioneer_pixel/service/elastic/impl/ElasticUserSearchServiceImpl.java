@@ -1,12 +1,12 @@
 package com.max.pioneer_pixel.service.elastic.impl;
 
-import com.max.pioneer_pixel.dao.EmailDataDao;
-import com.max.pioneer_pixel.dao.PhoneDataDao;
 import com.max.pioneer_pixel.dao.elastic.ElasticUserRepository;
-import com.max.pioneer_pixel.model.User;
-import com.max.pioneer_pixel.model.elastic.ElasticUser;
 import com.max.pioneer_pixel.model.EmailData;
 import com.max.pioneer_pixel.model.PhoneData;
+import com.max.pioneer_pixel.model.User;
+import com.max.pioneer_pixel.model.elastic.ElasticUser;
+import com.max.pioneer_pixel.service.EmailDataService;
+import com.max.pioneer_pixel.service.PhoneDataService;
 import com.max.pioneer_pixel.service.elastic.ElasticUserSearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -14,67 +14,64 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
 public class ElasticUserSearchServiceImpl implements ElasticUserSearchService {
 
     private final ElasticUserRepository elasticUserRepository;
-    private final EmailDataDao emailDataDao;
-    private final PhoneDataDao phoneDataDao;
+    private final EmailDataService emailDataService;
+    private final PhoneDataService phoneDataService;
 
     @Override
     public void indexUser(User user) {
-        ElasticUser eu = new ElasticUser();
-        eu.setId(user.getId());
-        eu.setName(user.getName());
-        eu.setDateOfBirth(user.getDateOfBirth());
+        String email = emailDataService.getEmailsByUserId(user.getId()).stream()
+                .findFirst()
+                .map(EmailData::getEmail)
+                .orElse(null);
 
-        Optional<EmailData> emailOpt = emailDataDao.findFirstByUserId(user.getId());
-        Optional<PhoneData> phoneOpt = phoneDataDao.findFirstByUserId(user.getId());
+        String phone = phoneDataService.getPhonesByUserId(user.getId()).stream()
+                .findFirst()
+                .map(PhoneData::getPhone)
+                .orElse(null);
 
-        emailOpt.ifPresent(email -> eu.setEmail(email.getEmail()));
-        phoneOpt.ifPresent(phone -> eu.setPhone(phone.getPhone()));
+        ElasticUser elasticUser = ElasticUser.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .dateOfBirth(user.getDateOfBirth())
+                .email(email)
+                .phone(phone)
+                .build();
 
-        elasticUserRepository.save(eu);
+        elasticUserRepository.save(elasticUser);
     }
 
     @Override
-    public Page<ElasticUser> search(String name, String email, String phone, LocalDate dateOfBirth, Pageable pageable) {
-        List<ElasticUser> filtered = StreamSupport
-                .stream(elasticUserRepository.findAll().spliterator(), false)
-                .filter(user -> name == null || user.getName().toLowerCase().startsWith(name.toLowerCase()))
-                .filter(user -> email == null || email.equalsIgnoreCase(user.getEmail()))
-                .filter(user -> phone == null || phone.equals(user.getPhone()))
-                .filter(user -> dateOfBirth == null || user.getDateOfBirth().isAfter(dateOfBirth))
-                .collect(Collectors.toList());
+    public Page<User> searchUsers(String name, String email, String phone, LocalDate dateOfBirth, Pageable pageable) {
+        List<ElasticUser> all = (List<ElasticUser>) elasticUserRepository.findAll();
 
-        int total = filtered.size();
+        List<ElasticUser> filtered = all.stream()
+                .filter(u -> name == null || (u.getName() != null && u.getName().startsWith(name)))
+                .filter(u -> email == null || (u.getEmail() != null && u.getEmail().equals(email)))
+                .filter(u -> phone == null || (u.getPhone() != null && u.getPhone().equals(phone)))
+                .filter(u -> dateOfBirth == null || (u.getDateOfBirth() != null && u.getDateOfBirth().isAfter(dateOfBirth)))
+                .toList();
+
         int start = (int) pageable.getOffset();
-        int end = Math.min(start + pageable.getPageSize(), total);
-        List<ElasticUser> pageContent = filtered.subList(Math.min(start, total), Math.min(end, total));
-
-        return new PageImpl<>(pageContent, pageable, total);
-    }
-
-    @Override
-    public Page<User> searchUsersViaElastic(String name, String email, String phone, LocalDate dateOfBirth, Pageable pageable) {
-        Page<ElasticUser> elasticPage = search(name, email, phone, dateOfBirth, pageable);
-        List<User> users = elasticPage.getContent().stream()
-                .map(this::toUser)
+        int end = Math.min(start + pageable.getPageSize(), filtered.size());
+        List<User> pageContent = filtered.subList(start, end).stream()
+                .map(this::convertToUser)
                 .collect(Collectors.toList());
-        return new PageImpl<>(users, pageable, elasticPage.getTotalElements());
+
+        return new PageImpl<>(pageContent, pageable, filtered.size());
     }
 
-    private User toUser(ElasticUser eu) {
-        User u = new User();
-        u.setId(eu.getId());
-        u.setName(eu.getName());
-        u.setDateOfBirth(eu.getDateOfBirth());
-        // Упрощённо — email/phone находятся только в ElasticUser, не в User
-        return u;
+    private User convertToUser(ElasticUser eu) {
+        User user = new User();
+        user.setId(eu.getId());
+        user.setName(eu.getName());
+        user.setDateOfBirth(eu.getDateOfBirth());
+        return user;
     }
 }

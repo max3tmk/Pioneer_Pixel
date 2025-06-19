@@ -6,6 +6,7 @@ import com.max.pioneer_pixel.service.EmailDataService;
 import com.max.pioneer_pixel.service.PhoneDataService;
 import com.max.pioneer_pixel.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -23,12 +24,15 @@ public class UserDataGenerator {
     private final EmailDataService emailDataService;
     private final PhoneDataService phoneDataService;
 
-    public void generateAndInsertUsers(int count) {
-        for (int i = 1; i <= count; i++) {
-            String name = faker.name().fullName();
-            String email = faker.internet().emailAddress();
-            String phone = generatePhone();
-            String password = "password_" + i; // пароли в нужном формате
+    @Value("${app.user-generator.count:10}")
+    private int userCount;
+
+    public void generateAndInsertUsers() {
+        for (int i = 1; i <= userCount; i++) {
+            String name = faker.name().firstName(); // только имя
+            String email = "email" + i + "@email.com"; // email_i@email.com
+            String phone = generatePhone(i); // формат 3752 + id + нули до 7 цифр
+            String password = "password" + i; // password_i
             LocalDate dob = generateDateOfBirth();
             BigDecimal balance = generateInitialBalance();
 
@@ -37,21 +41,23 @@ public class UserDataGenerator {
             user.setPassword(password);
             user.setDateOfBirth(dob);
 
-            userService.createUserWithAccount(user, balance); // сохраняем user + account
+            user = userService.createUserWithAccount(user, balance); // сохранили пользователя с аккаунтом
             emailDataService.addEmailData(user.getId(), email);
             phoneDataService.addPhoneData(user.getId(), phone);
         }
     }
 
-    private String generatePhone() {
-        return "3752" + (1000000 + random.nextInt(9000000));
+    private String generatePhone(int userId) {
+        // формируем строку с ведущими нулями до длины 7
+        String paddedId = String.format("%07d", userId);
+        return "3752" + paddedId;
     }
 
     private LocalDate generateDateOfBirth() {
-        return LocalDate.now().minusYears(18 + random.nextInt(42)); // от 18 до 60 лет
+        return LocalDate.now().minusYears(18 + random.nextInt(43)); // 18-60 лет
     }
 
     private BigDecimal generateInitialBalance() {
-        return BigDecimal.valueOf(50 + random.nextInt(951)); // от 50 до 1000
+        return BigDecimal.valueOf(50 + random.nextInt(951)); // 50-1000
     }
 }

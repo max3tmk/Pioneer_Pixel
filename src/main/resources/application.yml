@@ -1,3 +1,10 @@
+app:
+  user-generator:
+    count: 50
+jwt:
+  secret: wR9gUoVD3FpRWx2lWXUwtuMSgVtldpPq
+  expiration-ms: 86400000
+
 spring:
   main:
     allow-bean-definition-overriding: true

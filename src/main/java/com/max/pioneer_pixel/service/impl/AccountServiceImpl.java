@@ -24,7 +24,7 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     public void createInitialAccount(User user, BigDecimal initialBalance) {
         Account account = new Account();
-        account.setUser(user);  // устанавливаем объект User, а не просто userId
+        account.setUser(user);
         account.setBalance(initialBalance);
         account.setInitialBalance(initialBalance);
         accountDao.save(account);
@@ -71,6 +71,10 @@ public class AccountServiceImpl implements AccountService {
 
         fromAccount.setBalance(fromAccount.getBalance().subtract(amount));
         toAccount.setBalance(toAccount.getBalance().add(amount));
+
+        // Сохраняем изменения
+        accountDao.save(fromAccount);
+        accountDao.save(toAccount);
     }
 
     @Override

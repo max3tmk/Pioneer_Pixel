@@ -13,6 +13,6 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        userDataGenerator.generateAndInsertUsers(10);
+        userDataGenerator.generateAndInsertUsers();
     }
 }

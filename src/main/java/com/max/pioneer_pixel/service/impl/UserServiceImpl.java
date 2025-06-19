@@ -12,6 +12,7 @@ import com.max.pioneer_pixel.service.elastic.ElasticUserSearchService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,6 +38,10 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final ElasticUserSearchService elasticUserSearchService;
 
+
+    @Value("${search.type:jpa}")
+    private String searchType;
+
     @Override
     public User createUserWithAccount(User user, BigDecimal initialBalance) {
         if (user.getPassword() == null || user.getPassword().isEmpty()) {
@@ -53,7 +58,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<User> searchUsers(String name, String email, String phone, LocalDate dateOfBirth, Pageable pageable) {
         try {
-            return userDao.searchUsers(name, email, phone, dateOfBirth, pageable);
+            if ("elastic".equalsIgnoreCase(searchType)) {
+                return elasticUserSearchService.searchUsers(name, email, phone, dateOfBirth, pageable);
+            } else {
+                return userDao.searchUsers(name, email, phone, dateOfBirth, pageable);
+            }
         } catch (Exception e) {
             log.error("Error searching users", e);
             return Page.empty();
