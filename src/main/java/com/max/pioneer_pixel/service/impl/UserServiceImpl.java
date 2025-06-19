@@ -8,7 +8,10 @@ import com.max.pioneer_pixel.model.PhoneData;
 import com.max.pioneer_pixel.model.User;
 import com.max.pioneer_pixel.service.AccountService;
 import com.max.pioneer_pixel.service.UserService;
+import com.max.pioneer_pixel.service.elastic.ElasticUserSearchService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,19 +28,25 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+
     private final UserDao userDao;
     private final EmailDataDao emailDataDao;
     private final PhoneDataDao phoneDataDao;
     private final AccountService accountService;
-    private final PasswordEncoder passwordEncoder; // Добавили PasswordEncoder
+    private final PasswordEncoder passwordEncoder;
+    private final ElasticUserSearchService elasticUserSearchService;
 
     @Override
     public User createUserWithAccount(User user, BigDecimal initialBalance) {
-        // Хэшируем пароль перед сохранением
+        if (user.getPassword() == null || user.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("Password must not be empty");
+        }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         User savedUser = userDao.save(user);
         accountService.createInitialAccount(savedUser, initialBalance);
+        elasticUserSearchService.indexUser(savedUser);
         return savedUser;
     }
 
@@ -45,6 +55,7 @@ public class UserServiceImpl implements UserService {
         try {
             return userDao.searchUsers(name, email, phone, dateOfBirth, pageable);
         } catch (Exception e) {
+            log.error("Error searching users", e);
             return Page.empty();
         }
     }
@@ -55,20 +66,25 @@ public class UserServiceImpl implements UserService {
         if (emailDataDao.findByEmail(email).isPresent()) {
             throw new IllegalArgumentException("Email is already taken by another user");
         }
-        EmailData newEmail = new EmailData();
         User user = userDao.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User with id " + userId + " not found"));
+        EmailData newEmail = new EmailData();
         newEmail.setUser(user);
         newEmail.setEmail(email);
         emailDataDao.save(newEmail);
+
+        elasticUserSearchService.indexUser(user);
     }
 
     @Override
     @Transactional
     public void deleteEmail(Long userId, String email) {
-        emailDataDao.findByEmail(email)
-                .filter(e -> e.getUser().getId().equals(userId))
+        emailDataDao.findByUserIdAndEmail(userId, email)
                 .ifPresent(emailDataDao::delete);
+
+        User user = userDao.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        elasticUserSearchService.indexUser(user);
     }
 
     @Override
@@ -77,34 +93,44 @@ public class UserServiceImpl implements UserService {
         if (phoneDataDao.findByPhone(phone).isPresent()) {
             throw new IllegalArgumentException("Phone is already taken by another user");
         }
-        PhoneData newPhone = new PhoneData();
         User user = userDao.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User with id " + userId + " not found"));
+        PhoneData newPhone = new PhoneData();
         newPhone.setUser(user);
         newPhone.setPhone(phone);
         phoneDataDao.save(newPhone);
+        elasticUserSearchService.indexUser(user);
     }
 
     @Override
     @Transactional
     public void deletePhone(Long userId, String phone) {
-        phoneDataDao.findByPhone(phone)
-                .filter(e -> e.getUser().getId().equals(userId))
+        phoneDataDao.findByUserIdAndPhone(userId, phone)
                 .ifPresent(phoneDataDao::delete);
+
+        User user = userDao.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        elasticUserSearchService.indexUser(user);
     }
 
     @Override
     public List<String> getEmails(Long userId) {
-        return emailDataDao.findByUserId(userId)
-                .stream()
+        List<EmailData> emails = emailDataDao.findByUserId(userId);
+        if (emails == null || emails.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return emails.stream()
                 .map(EmailData::getEmail)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<String> getPhones(Long userId) {
-        return phoneDataDao.findByUserId(userId)
-                .stream()
+        List<PhoneData> phones = phoneDataDao.findByUserId(userId);
+        if (phones == null || phones.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return phones.stream()
                 .map(PhoneData::getPhone)
                 .collect(Collectors.toList());
     }

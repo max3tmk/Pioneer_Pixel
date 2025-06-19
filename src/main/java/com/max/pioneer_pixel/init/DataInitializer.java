@@ -1,5 +1,6 @@
-package com.max.pioneer_pixel.util;
+package com.max.pioneer_pixel.init;
 
+import com.max.pioneer_pixel.util.UserDataGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
