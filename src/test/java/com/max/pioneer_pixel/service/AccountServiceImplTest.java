@@ -14,7 +14,8 @@ import org.mockito.Mockito;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 public class AccountServiceImplTest {
@@ -180,7 +181,7 @@ public class AccountServiceImplTest {
 
             when(userDao.findByName("sender")).thenReturn(Optional.of(senderUser));
 
-            BigDecimal[] invalidAmounts = { BigDecimal.ZERO, new BigDecimal("-100.00") };
+            BigDecimal[] invalidAmounts = {BigDecimal.ZERO, new BigDecimal("-100.00")};
 
             for (BigDecimal amount : invalidAmounts) {
                 IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,

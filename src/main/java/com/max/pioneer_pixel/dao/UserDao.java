@@ -21,15 +21,15 @@ public interface UserDao extends JpaRepository<User, Long> {
     Optional<User> findByPhone(@Param("phone") String phone);
 
     @Query("""
-        SELECT u FROM User u
-        LEFT JOIN EmailData e ON e.user.id = u.id
-        LEFT JOIN PhoneData p ON p.user.id = u.id
-        WHERE (:name IS NULL OR u.name LIKE CONCAT(:name, '%'))
-          AND (:email IS NULL OR e.email = :email)
-          AND (:phone IS NULL OR p.phone = :phone)
-          AND (:dateOfBirth IS NULL OR u.dateOfBirth > :dateOfBirth)
-        GROUP BY u
-        """)
+            SELECT u FROM User u
+            LEFT JOIN EmailData e ON e.user.id = u.id
+            LEFT JOIN PhoneData p ON p.user.id = u.id
+            WHERE (:name IS NULL OR u.name LIKE CONCAT(:name, '%'))
+              AND (:email IS NULL OR e.email = :email)
+              AND (:phone IS NULL OR p.phone = :phone)
+              AND (:dateOfBirth IS NULL OR u.dateOfBirth > :dateOfBirth)
+            GROUP BY u
+            """)
     Page<User> searchUsers(
             @Param("name") String name,
             @Param("email") String email,

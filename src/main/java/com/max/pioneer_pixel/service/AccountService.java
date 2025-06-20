@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 public interface AccountService {
 
     void createInitialAccount(User user, BigDecimal initialBalance);
+
     void updateBalance(Long userId, java.math.BigDecimal newBalance);
 
     void transfer(Long fromUserId, Long toUserId, java.math.BigDecimal amount);

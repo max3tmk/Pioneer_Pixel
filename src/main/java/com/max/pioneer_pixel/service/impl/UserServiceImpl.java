@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -64,13 +65,15 @@ public class UserServiceImpl implements UserService {
     public Page<User> searchUsers(String name, String email, String phone, LocalDate dateOfBirth, Pageable pageable) {
         try {
             if ("elastic".equalsIgnoreCase(searchType)) {
+                log.info("[SEARCH] Using Elasticsearch for user search.");
                 return elasticUserSearchService.searchUsers(name, email, phone, dateOfBirth, pageable);
             } else {
+                log.info("[SEARCH] Using JPA for user search.");
                 return userDao.searchUsers(name, email, phone, dateOfBirth, pageable);
             }
         } catch (Exception e) {
             log.error("Error searching users", e);
-            return Page.empty();
+            return new PageImpl<>(Collections.emptyList(), pageable, 0);
         }
     }
 

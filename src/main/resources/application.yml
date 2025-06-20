@@ -49,11 +49,6 @@ spring:
 logging:
   level:
     org.flywaydb: DEBUG
-    org.springframework.security: DEBUG
-    org.springframework.security.web: DEBUG
-    org.springframework.security.web.access: DEBUG
-    org.springframework.security.authentication: DEBUG
-    org.springframework.security.core: DEBUG
 
 search:
   type: jpa  # или elastic для поиска через Elasticsearch

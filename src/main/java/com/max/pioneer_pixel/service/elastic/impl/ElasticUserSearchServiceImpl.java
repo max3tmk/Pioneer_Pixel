@@ -9,12 +9,15 @@ import com.max.pioneer_pixel.service.EmailDataService;
 import com.max.pioneer_pixel.service.PhoneDataService;
 import com.max.pioneer_pixel.service.elastic.ElasticUserSearchService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
@@ -49,7 +52,9 @@ public class ElasticUserSearchServiceImpl implements ElasticUserSearchService {
 
     @Override
     public Page<User> searchUsers(String name, String email, String phone, LocalDate dateOfBirth, Pageable pageable) {
-        List<ElasticUser> all = (List<ElasticUser>) elasticUserRepository.findAll();
+        List<ElasticUser> all = StreamSupport
+                .stream(elasticUserRepository.findAll().spliterator(), false)
+                .collect(Collectors.toList());
 
         List<ElasticUser> filtered = all.stream()
                 .filter(u -> name == null || (u.getName() != null && u.getName().startsWith(name)))

@@ -10,8 +10,10 @@ import java.util.Optional;
 @Repository
 public interface PhoneDataDao extends JpaRepository<PhoneData, Long> {
     Optional<PhoneData> findByPhone(String phone);
+
     List<PhoneData> findByUserId(Long userId);
 
     Optional<PhoneData> findByUserIdAndPhone(Long userId, String phone);
+
     Optional<PhoneData> findFirstByUserId(Long userId);
 }

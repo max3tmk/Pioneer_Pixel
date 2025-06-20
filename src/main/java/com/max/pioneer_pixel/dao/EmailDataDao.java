@@ -10,8 +10,10 @@ import java.util.Optional;
 @Repository
 public interface EmailDataDao extends JpaRepository<EmailData, Long> {
     Optional<EmailData> findByEmail(String email);
+
     List<EmailData> findByUserId(Long userId);
 
     Optional<EmailData> findByUserIdAndEmail(Long userId, String email);
+
     Optional<EmailData> findFirstByUserId(Long userId);
 }

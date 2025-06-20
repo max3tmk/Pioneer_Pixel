@@ -8,5 +8,6 @@ import java.time.LocalDate;
 
 public interface ElasticUserSearchService {
     void indexUser(User user);
+
     Page<User> searchUsers(String name, String email, String phone, LocalDate dateOfBirth, Pageable pageable);
 }
