@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -55,6 +56,10 @@ public class UserServiceImpl implements UserService {
         return savedUser;
     }
 
+    @Cacheable(
+            value = "usersSearchCache",
+            keyGenerator = "customKeyGenerator"
+    )
     @Override
     public Page<User> searchUsers(String name, String email, String phone, LocalDate dateOfBirth, Pageable pageable) {
         try {

@@ -38,9 +38,22 @@ spring:
   elasticsearch:
     uris: http://localhost:9200/
 
+  cache:
+    type: redis
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 60000
+
 logging:
   level:
     org.flywaydb: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.security.web: DEBUG
+    org.springframework.security.web.access: DEBUG
+    org.springframework.security.authentication: DEBUG
+    org.springframework.security.core: DEBUG
 
 search:
   type: jpa  # или elastic для поиска через Elasticsearch
