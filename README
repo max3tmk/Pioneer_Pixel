@@ -117,3 +117,31 @@ http://localhost:8080/swagger-ui/index.html
 Email: email<user_id>@email.com
 Phone: 37520..0<user_id> - нулей добавляется столько, чтобы вместе с user_id было 7 цифр
 Так как генерируется определенное количество пользователей (app:user-generator:count: 50 заданное в application.yml) то при повторной генерации они будут повторяться.
+
+Тесты
+
+Unit-тесты метода transfer(...) в AccountServiceImpl
+
+1 transfer_shouldTransferMoneyBetweenAccounts. Проверяет успешный перевод денег между двумя разными пользователями:
+ - Ищется текущий авторизованный отправитель.
+ - Проверяется корректное списание и зачисление средств.
+ - Проверяется вызов accountDao.save() для обоих аккаунтов.
+2 transfer_shouldThrowExceptionIfSenderNotFound. Проверяет, что при отсутствии отправителя в базе выбрасывается EntityNotFoundException.
+3 transfer_shouldThrowExceptionIfReceiverNotFound. Проверяет, что при отсутствии получателя в базе выбрасывается EntityNotFoundException.
+4 transfer_shouldThrowExceptionIfInsufficientFunds. Проверяет, что при недостаточном балансе у отправителя операция прерывается с IllegalStateException.
+5 transfer_shouldThrowSecurityExceptionIfTransferFromNotCurrentUser. Проверяет, что пользователь может переводить деньги только со своего аккаунта.
+ - При попытке перевести с чужого аккаунта выбрасывается SecurityException.
+6 transfer_shouldThrowExceptionIfTransferToSelf. Проверяет, что перевод самому себе невозможен.
+ - Выбрасывается IllegalArgumentException.
+7 transfer_shouldThrowExceptionIfAmountIsNonPositive. Проверяет, что нельзя перевести 0 или отрицательную сумму.
+ - Выбрасывается IllegalArgumentException.
+
+Интеграционный тест UserApiIntegrationTest
+
+Тестирует API поиска пользователей через /API/users/search с использованием Testcontainers и MockMvc.
+Проверяет следующие аспекты:
+ - Корректную интеграцию с PostgreSQL в контейнере.
+ - Отработку фильтров по имени, дате рождения, email и телефону.
+ - Правильную работу пагинации.
+ - Ожидаемый формат и содержимое ответа.
+ - Запуск и завершение всего Spring-контекста (с учетом безопасности, Elasticsearch и других бинов).
